@@ -2,12 +2,11 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "master", "main" ]  # 当你向这些分支推送代码时触发
-  workflow_dispatch:              # 允许手动触发
+    branches: [ "master", "main" ]
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  # 镜像名称格式：ghcr.io/用户名/仓库名
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -28,11 +27,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels)
+      - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY  }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest
             type=sha,format=short
@@ -42,5 +41,6 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ id.meta.outputs.tags }}
-          labels: ${{ id.meta.outputs.labels }}
+          # 注意这里修正为 steps.meta.outputs
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
